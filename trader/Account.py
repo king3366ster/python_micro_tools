@@ -5,9 +5,13 @@ import os
 
 path_prefix = u'./data/'
 
+class Context:
+    def __init__(self, cash=100000):
+        self.portfolio = {}
+        self.cash = cash
 
 class BaseAccount:
-    def __init__(self, cash=10000, current_date=None):
+    def __init__(self, cash=100000, current_date=None):
         self.security_cache = {}
         self.set_order_cost(0, 0)
         self.set_slippage(0)
@@ -15,6 +19,7 @@ class BaseAccount:
         self.min_deal_amount = 100
         self.current_date = current_date
         self.benchmark_data = None
+        self.context = Context(cash = cash)
 
     def _read_data(self, security):
         if security in self.security_cache:
