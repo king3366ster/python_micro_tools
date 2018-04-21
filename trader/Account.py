@@ -1,9 +1,8 @@
 # -*- coding:utf-8 -*-
-import pandas as pd
-import tushare as ts
-import os
 
-path_prefix = u'./data/'
+import os
+import pandas as pd
+import loadData
 
 # 账户上下文
 class Context:
@@ -33,32 +32,24 @@ class Portfolio:
         return self
     
 
-class BaseAccount:
+class AccountBase:
     def __init__(self, cash=100000, current_date=None):
         self.cash = cash
         self.current_date = current_date
-        self.order_cost_buy = 0,0003
-        self.order_cost_sell = 0.0013
         self.security_cache = {}
+        # 设置交易费用
         self.set_order_cost(0, 0)
+        # 设置滑点
         self.set_slippage(0)
-        self.benchmark_data = None
         # 最小成交金额
-        self.min_deal_amount = 100
+        self.set_min_mount(1.0)
+        self.benchmark_data = None
         self.context = Context()
 
     def _read_data(self, security):
         if security in self.security_cache:
             return self.security_cache[security]
-        data_path = u'%s%s.csv' % (path_prefix, security)
-        if os.path.exists(data_path):
-            result = pd.read_csv(data_path)
-        else:
-            df = ts.get_k_data(security, index=False, start='2017-01-01')
-            df.to_csv(data_path)
-            self.security_cache[security] = df
-            result = df
-        result.sort_values(by='date', ascending=True, inplace=True)
+        result = loadData.load_data(security)
         self.security_cache[security] = result
         return result
 
@@ -68,6 +59,8 @@ class BaseAccount:
         self.benchmark_data.sort_values(by='date', ascending=True, inplace=True)
         self.current_date = self.get_curr_date()
     
+    def set_min_mount(self, amount = 1.0):
+        self.min_deal_amount = amount
     # 获取上一交易日
     def get_prev_date(self):
         if self.benchmark_data.empty:
@@ -180,8 +173,10 @@ class BaseAccount:
         return market_value
 
 def main():
-    ua = BaseAccount(current_date='2017-05-01')
+    ua = AccountBase(current_date='2017-05-01')
     ua.set_benchmark('600000')
+    ua.set_order_cost(0.0003, 0.0013)
+    ua.set_min_mount(100)
     # print ua.get_curr_date()
     # print ua.get_prev_date()
     # print ua.get_next_date()
