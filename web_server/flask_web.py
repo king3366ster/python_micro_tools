@@ -1,4 +1,5 @@
 # -*- coding:utf-8 -*-
+import json
 from flask import Flask, Response, session
 from flask import request, redirect, url_for
 from flask import make_response, render_template
@@ -46,10 +47,17 @@ def test():
     #     return redirect(url_for('login'))
     return render_template('test.html')
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def home():
-    return 'Hello Flask!'
-
+    print 111
+    print request.headers
+    print 222
+    response = make_response(json.dumps({"data":"Hello Flask!"}))
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers["Access-Control-Allow-Headers"] = "X-Requested-With"  
+    response.headers["Access-Control-Allow-Expose-Headers"] = "*"  
+    response.headers["Access-Control-Allow-Methods"] = "PUT,POST,GET,DELETE,OPTIONS" 
+    return response
 
 @app.route('/post_test', methods=['GET', 'POST'])
 def post_test():
@@ -57,16 +65,17 @@ def post_test():
         print request.headers
         print request.data
         print request.form
-        print request.files
-        with open ('test.jpg', 'wb') as f:
-            f.write(request.files['file'].read())
-        return '{"a":2}'
+        # print request.files
+        # with open ('test.jpg', 'wb') as f:
+        #     f.write(request.files['file'].read())
+        return Response(json.dumps({'ret': 2}), mimetype='application/json')
     elif request.method == 'GET':
-        return render_template('login.html')
+        return Response(json.dumps({'err': 3}), mimetype='application/json')
+        # return render_template('login.html')
 
 if __name__ == '__main__':
     app.run(
         host = '0.0.0.0',
-        port = 3004,  
+        port = 80,  
         debug = True 
     )
