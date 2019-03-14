@@ -12,7 +12,7 @@ app.config['SECRET_KEY'] = '123456'
 #func是使用该修饰符的地方是视图函数
 def login_require(func):
     def decorator(*args, **kwargs):
-        print session
+        print(session)
         user = session.get('user')
         if user:
             return func(*args, **kwargs)
@@ -35,7 +35,7 @@ def login():
 @app.route('/logout')
 def logout():
     # remove the username from the session if it's there
-    print session
+    print(session)
     if 'user' in session:
         session.pop('user', None)
     return redirect(url_for('login'))
@@ -49,9 +49,7 @@ def test():
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
-    print 111
-    print request.headers
-    print 222
+    print(request.headers)
     response = make_response(json.dumps({"data":"Hello Flask!"}))
     response.headers['Access-Control-Allow-Origin'] = '*'
     response.headers["Access-Control-Allow-Headers"] = "X-Requested-With"  
@@ -62,16 +60,26 @@ def home():
 @app.route('/post_test', methods=['GET', 'POST'])
 def post_test():
     if request.method == 'POST':
-        print request.headers
-        print request.data
-        print request.form
-        # print request.files
+        print(request.headers)
+        print(request.data)
+        print(request.form)
+        # print(request.files)
         # with open ('test.jpg', 'wb') as f:
         #     f.write(request.files['file'].read())
         return Response(json.dumps({'ret': 2}), mimetype='application/json')
     elif request.method == 'GET':
         return Response(json.dumps({'err': 3}), mimetype='application/json')
         # return render_template('login.html')
+
+@app.route('/post_file', methods=['GET', 'POST'])
+def post_file():
+    if request.method == 'POST':
+        file = request.files['file']
+        print(file.filename)
+        file.save('static/{}'.format(file.filename))
+        return Response(json.dumps({'ret': 2}), mimetype='application/json')
+    elif request.method == 'GET':
+        return render_template('post_file.html')
 
 if __name__ == '__main__':
     app.run(
