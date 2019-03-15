@@ -63,9 +63,6 @@ def post_test():
         print(request.headers)
         print(request.data)
         print(request.form)
-        # print(request.files)
-        # with open ('test.jpg', 'wb') as f:
-        #     f.write(request.files['file'].read())
         return Response(json.dumps({'ret': 2}), mimetype='application/json')
     elif request.method == 'GET':
         return Response(json.dumps({'err': 3}), mimetype='application/json')
@@ -76,10 +73,15 @@ def post_file():
     if request.method == 'POST':
         file = request.files['file']
         print(file.filename)
-        file.save('static/{}'.format(file.filename))
+        file.save('uploads/{}'.format(file.filename))
         return Response(json.dumps({'ret': 2}), mimetype='application/json')
     elif request.method == 'GET':
         return render_template('post_file.html')
+
+@app.route('/post_logger')
+def post_logger():
+    print(request.data)
+    return Response('', status=200)
 
 if __name__ == '__main__':
     app.run(
